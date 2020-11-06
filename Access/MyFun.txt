@@ -1,0 +1,120 @@
+Function MyFun ()
+    Dim МойСеанс        As WorkSpace
+    Dim МояБД           As Database
+    Dim МояТаблица      As TableDef
+    Dim МойЗапрос       As QueryDef
+    Dim МояФорма        As Form
+    Dim МояЗапись       As Recordset
+    Dim МоеПоле         As Field
+    Dim I               As Integer
+    Dim ЧислоТаблиц     As Integer
+    Dim ЧислоЗапросов   As Integer
+    Dim ЧислоФорм       As Integer
+
+    Set МойСеанс = DBEngine.Workspaces(0)
+    Set МояБД = МойСеанс.Databases(0)
+    Set МояЗапись = МояБД.OpenRecordset("Запрос1")
+    'Set МоеПоле=МояЗапись.????
+
+    ЧислоТаблиц = МояБД.TableDefs.Count
+    ЧислоЗапросов = МояБД.QueryDefs.Count
+    ЧислоФорм = Forms.Count
+    ЧислоПолей = МояЗапись.Fields.Count
+
+    Debug.Print
+    Debug.Print "Вывод всех имен таблиц в текущей базе"
+    Debug.Print
+    Debug.Print "Номер            Имя"
+    For I = 0 To ЧислоТаблиц - 1
+        Debug.Print I, МояБД.TableDefs(I).Name
+    Next I
+    Debug.Print "Всего", ЧислоТаблиц
+
+
+    Debug.Print
+    Debug.Print "Вывод всех имен запросов в текущей базе"
+    Debug.Print
+    Debug.Print "Номер            Имя"
+    For I = 0 To ЧислоЗапросов - 1
+        Debug.Print I, МояБД.QueryDefs(I).Name
+    Next I
+    Debug.Print "Всего", ЧислоЗапросов
+
+    Debug.Print
+    Debug.Print "Вывод всех имен ОТКРЫТЫХ форм в текущей базе"
+    Debug.Print
+    Debug.Print "Номер            Имя"
+    For I = 0 To ЧислоФорм - 1
+        Debug.Print I, Forms(I).Name
+    Next I
+    Debug.Print "Всего", ЧислоФорм
+    I = 1
+    Debug.Print
+    Debug.Print "Вывод всех записей в текущей базе"
+    Debug.Print
+
+    Do Until МояЗапись.EOF
+        Debug.Print МояЗапись![Сч], I, "*" + МояЗапись![Фам] + "*", МояЗапись![Возр]
+        'MyFun = i
+        I = I + 1
+        МояЗапись.MoveNext
+    Loop
+
+    МояЗапись.MoveLast
+
+    Debug.Print
+    Debug.Print "Последняя запись"; МояЗапись![Сч]; I; "*" + МояЗапись![Фам] + "*"; МояЗапись![Возр]
+    Debug.Print
+
+
+    Debug.Print
+    Debug.Print "Вывод всех имен полей в текущей базе"
+    Debug.Print
+    For I = 0 To ЧислоПолей - 1
+        Debug.Print I, МояЗапись.Fields(I).Name
+    Next I
+    Debug.Print "Число полей", ЧислоПолей
+
+End Function
+
+----- Удаление записи -----------------------------------
+=========================================================
+Sub Кнопка80_Click ()
+On Error GoTo Err_Кнопка80_Click
+
+    DoCmd DoMenuItem A_FORMBAR, A_EDITMENU, A_SELECTRECORD_V2, , A_MENU_VER20
+    DoCmd DoMenuItem A_FORMBAR, A_EDITMENU, A_DELETE_V2, , A_MENU_VER20
+
+Exit_Кнопка80_Click:
+    Exit Sub
+
+Err_Кнопка80_Click:
+    MsgBox Error$
+    Resume Exit_Кнопка80_Click
+
+End Sub
+---------------------------------------------------------
+
+Второй пример применения метода Delete
+
+Фрагмент программы данного примера добавляет запись в таблицу "Клиенты" текущей базы данных "Борей" (файл NWIND.MDB), а затем удаляет ее с помощью метода Delete.
+
+Dim МояБД As Database, МойНабор As Recordset
+Set МояБД = DBEngine.Workspaces(0).Databases(0)   ' Определение текущей базы данных.
+Set МойНабор = МояБД![Клиенты].OpenRecordset()   ' Открытие таблицы.
+МойНабор.Index = "PrimaryKey"	' Определить индекс.
+
+МойНабор.AddNew		' Подготовка новой записи.
+МойНабор![Клиент] = "ЗМЕЙК"	' Задание ключа.
+МойНабор![Название] = "Кафе ""Зеленый змей"" "   ' Задание названия фирмы.
+МойНабор.Update		' Сохранение изменений.
+...
+МойНабор.Seek "=", "ЗМЕЙК"	' Определение текущей записи.
+If Not МойНабор.NoMatch Then
+	МойНабор.Delete	' Удаление записи.
+End If
+
+МойНабор.Close		' Закрытие таблицы.
+
+=================================================================
+=================================================================
